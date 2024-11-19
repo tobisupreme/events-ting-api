@@ -72,7 +72,7 @@ model TicketAudit {
 
 enum TicketStatus {
   Pending
-  Generated
-  Claimed
-  Void
+  Confirmed
+  Cancelled
+  Used
 }
