@@ -9,9 +9,10 @@ datasource db {
 
 model Users {
   id                 String               @id @default(uuid()) @db.Uuid
-  name               String               @db.VarChar(255)
-  age                Int
+  name               String?              @db.VarChar(255)
+  age                Int?
   email              String               @unique(map: "users_email_unique") @db.VarChar(255)
+  phone              String?              @db.VarChar(25)
   metadata           Json?
   status             Boolean              @default(true)
   createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamp(6)
@@ -43,14 +44,14 @@ model EventRegisteration {
   event     Event    @relation(fields: [eventId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   status    Boolean  @default(true)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-  tickets   Ticket[]
+  ticket    Ticket?
 
   @@map("event_registerations")
 }
 
 model Ticket {
   id                  String             @id @default(uuid()) @db.Uuid
-  eventRegistrationId String             @map("event_registration_id") @db.Uuid
+  eventRegistrationId String             @unique @map("event_registration_id") @db.Uuid
   event_registration  EventRegisteration @relation(fields: [eventRegistrationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   barcodeData         String?            @map("barcode_data") @db.Text
   status              TicketStatus       @default(Pending)
