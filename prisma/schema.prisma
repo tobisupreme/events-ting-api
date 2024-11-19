@@ -46,6 +46,7 @@ model EventRegisteration {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   ticket    Ticket?
 
+  @@unique([userId, eventId])
   @@map("event_registerations")
 }
 
