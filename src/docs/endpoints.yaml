@@ -12,14 +12,8 @@ servers:
       variables:
           scheme:
               default: http
-              enum:
-                  - http
-                  - https
           host:
-              default: localhost:3211
-              enum:
-                  - localhost:3211 # Local development server
-                  - events-ting-api.onrender.com # Development server
+              default: 127.0.0.1:{{PORT}}
 
 paths:
     # --------------- Users ---------------
