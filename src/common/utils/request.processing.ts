@@ -7,9 +7,11 @@ export enum ApiError {
     ParamInvalid = 'error.api.param_invalid',
     QueryInvalid = 'error.api.query_invalid',
     Generic = 'error.api.generic',
-    InvalidValue = 'error.api.bad_boy',
+    InvalidOperation = 'error.api.operation_invalid',
     TicketClaimed = 'error.api.ticket_claimed',
     TicketInvalid = 'error.api.ticket_invalid',
+    TicketDulicate = 'error.api.ticket_duplicate',
+    TicketGenerationFailed = 'error.api.ticket_generation_failed',
 }
 
 export enum ResponseType {

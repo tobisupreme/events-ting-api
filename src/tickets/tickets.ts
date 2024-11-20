@@ -5,6 +5,7 @@ import {
     createResponse,
     ensureRequestBody,
     fail,
+    generateQRCode,
     IsValidUuidSchema,
     ResponseType,
     validateRequestBody,
@@ -61,10 +62,15 @@ async function claimTicket(req: Request, res: Response) {
 async function generateEventRegistrationTicket(req: Request, res: Response) {
     const { eventRegistrationId } = req.body as GenerateTicketSchema;
 
+    const barcodeData = await generateQRCode(eventRegistrationId);
+    if (!barcodeData) {
+        return fail(res, ApiError.TicketGenerationFailed);
+    }
+
     const data = await prisma.ticket.create({
         data: {
             eventRegistrationId,
-            barcodeData: `seethebarcode:${new Date().getTime()}`,
+            barcodeData,
         },
     });
 
