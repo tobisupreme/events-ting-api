@@ -1,3 +1,4 @@
+import { TicketStatus } from '@prisma/client';
 import { z } from 'zod';
 
 export const EventSchema = z
@@ -18,4 +19,13 @@ export const RegisterUserForEventSchema = z
     .strict();
 export type RegisterUserForEventSchema = z.infer<
     typeof RegisterUserForEventSchema
+>;
+
+export const CheckInUserForEventSchema = z
+    .object({
+        status: z.nativeEnum(TicketStatus),
+    })
+    .strict();
+export type CheckInUserForEventSchema = z.infer<
+    typeof CheckInUserForEventSchema
 >;
