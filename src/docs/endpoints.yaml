@@ -1,0 +1,499 @@
+openapi: 3.0.0
+info:
+    title: Events Ticketing API
+    description: |
+        This documentation covers the APIs used to generate and manage barcode tickets for events. 
+        The application allows users to create, update, and delete events, as well as generate unique barcode tickets for each event. 
+        Users can also manage attendees, check-in participants, and track event attendance in real-time. 
+        These APIs provide a comprehensive solution for event organizers to efficiently manage their events and ensure a smooth check-in process for attendees.
+    version: 0.0.1
+servers:
+    - url: '{scheme}://{host}'
+      variables:
+          scheme:
+              default: http
+              enum:
+                  - http
+                  - https
+          host:
+              default: localhost:3211
+              enum:
+                  - localhost:3211 # Local development server
+                  - events-ting-api.onrender.com # Development server
+
+paths:
+    # --------------- Users ---------------
+    /users:
+        get:
+            tags:
+                - Users
+            summary: Retrieve a list of users
+            responses:
+                '200':
+                    description: A list of users
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        $ref: '#/components/schemas/StatusEnum'
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/UserSchema'
+                            examples:
+                                Success:
+                                    value:
+                                        status: success
+                                        data:
+                                            - id: '9546bfce-ee84-4140-b94f-13714b0cc90e'
+                                              name: 'Abobi'
+                                              age: 19
+                                              email: 'abobi@inboxbear.com'
+                                              metadata: null
+                                              status: true
+                                              createdAt: '2024-11-10T07:38:43.009Z'
+                                              updatedAt: '2024-11-10T07:38:43.009Z'
+                                            - id: 'cdbfcf6c-25c5-4db3-88bf-57417b11cc00'
+                                              name: 'Olamide'
+                                              age: 38
+                                              email: 'olamide@inboxbear.com'
+                                              metadata: null
+                                              status: true
+                                              createdAt: '2024-11-10T17:18:04.597Z'
+                                              updatedAt: '2024-11-10T17:18:04.597Z'
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            critical:
+                                                type: boolean
+                                                example: true
+
+    # --------------- Events ---------------
+    /events:
+        get:
+            tags:
+                - Events
+            summary: Get all events
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        $ref: '#/components/schemas/StatusEnum'
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/EventSchema'
+                            examples:
+                                example-0:
+                                    summary: Get all events successfully
+                                    value:
+                                        status: success
+                                        data:
+                                            - id: 8bf0ded0-6846-4fc9-9f63-8a09e8345789
+                                              name: YPIT Series F
+                                              startDate: 2024-11-30T00:00:00.000Z
+                                              endDate: null
+                                              metadata: null
+                                              status: true
+                                              createdAt: 2024-11-10T14:09:59.247Z
+                                              updatedAt: 2024-11-10T14:09:59.247Z
+                                            - id: f149b1a4-57e4-4a52-8942-08ac15b1dd68
+                                              name: Dev Fest Lagos
+                                              startDate: 2024-11-15T00:00:00.000Z
+                                              endDate: 2024-11-16T00:00:00.000Z
+                                              metadata: null
+                                              status: true
+                                              createdAt: 2024-11-10T17:17:39.913Z
+                                              updatedAt: 2024-11-10T17:17:39.913Z
+
+    /events/register-user:
+        post:
+            tags:
+                - Events
+            summary: Register a user for an event
+            requestBody:
+                description: User and event IDs to register a user for an event
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RegisterUserForEventSchema'
+            responses:
+                '200':
+                    description: User successfully registered for the event
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        $ref: '#/components/schemas/StatusEnum'
+                                    data:
+                                        $ref: '#/components/schemas/EventRegistrationSchema'
+                '400':
+                    description: Bad request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            context:
+                                                type: string
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            critical:
+                                                type: boolean
+                                                example: true
+
+    /events/{eventId}/registrations:
+        get:
+            tags:
+                - Events
+            summary: Retrieve registrations for a specific event
+            parameters:
+                - name: eventId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: The ID of the event
+            responses:
+                '200':
+                    description: A list of event registrations
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        $ref: '#/components/schemas/StatusEnum'
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/EventRegistrationSchema'
+                '400':
+                    description: Bad request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            context:
+                                                type: string
+                '404':
+                    description: Event not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            context:
+                                                type: string
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            critical:
+                                                type: boolean
+                                                example: true
+
+    /events/registrations/{registrationId}:
+        get:
+            tags:
+                - Events
+            summary: Get details about an event registration
+            parameters:
+                - name: registrationId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: The ID of the event registration entry
+            responses:
+                '200':
+                    description: Event registration details
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        $ref: '#/components/schemas/StatusEnum'
+                                    data:
+                                        $ref: '#/components/schemas/EventRegistrationSchema'
+                '400':
+                    description: Bad request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            context:
+                                                type: string
+                '404':
+                    description: Event registration not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            context:
+                                                type: string
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            critical:
+                                                type: boolean
+                                                example: true
+
+components:
+    schemas:
+        RegisterUserForEventSchema:
+            type: object
+            properties:
+                userId:
+                    type: string
+                    format: uuid
+                eventId:
+                    type: string
+                    format: uuid
+            required:
+                - userId
+                - eventId
+        UserSchema:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                name:
+                    type: string
+                    nullable: true
+                age:
+                    type: integer
+                    nullable: true
+                email:
+                    type: string
+                    format: email
+                phone:
+                    type: string
+                    nullable: true
+                metadata:
+                    type: object
+                    nullable: true
+                status:
+                    type: boolean
+                    default: true
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+        EventSchema:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                name:
+                    type: string
+                startDate:
+                    type: string
+                    format: date-time
+                endDate:
+                    type: string
+                    format: date-time
+                status:
+                    type: boolean
+                metadata:
+                    type: object
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+            required:
+                - id
+                - name
+                - startDate
+                - status
+        EventRegistrationSchema:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                    example: 'c9ebabfa-516a-4d43-91d4-9d6c972510dd'
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: '2024-11-20T07:11:30.221Z'
+                status:
+                    type: boolean
+                    example: true
+                user:
+                    type: object
+                    properties:
+                        id:
+                            type: string
+                            format: uuid
+                            example: '3e0104a2-a820-4a8b-8ade-29692002abe5'
+                        email:
+                            type: string
+                            format: email
+                            example: 'gombe@mail.com'
+                        name:
+                            type: string
+                            nullable: true
+                event:
+                    type: object
+                    properties:
+                        id:
+                            type: string
+                            format: uuid
+                            example: '3e0104a2-a820-4a8b-8ade-29692002abe5'
+                        name:
+                            type: string
+                ticket:
+                    type: object
+                    required:
+                        - id
+                        - status
+                    properties:
+                        id:
+                            type: string
+                            format: uuid
+                            example: '3e0104a2-a820-4a8b-8ade-29692002abe5'
+                        barcodeData:
+                            type: string
+                            format: base64
+                            description: Base64 encoded barcode image
+                        status:
+                            $ref: '#/components/schemas/TicketStatusEnum'
+        StatusEnum:
+            type: string
+            enum:
+                - success
+                - error
+                - critical
+        TicketStatusEnum:
+            type: string
+            description: Represents the possible states of a ticket in the system
+            enum:
+                - Pending
+                - Confirmed
+                - Cancelled
+                - Used
+            default: Pending
+            x-enum-metadata:
+                Pending:
+                    description: Initial state when ticket is created but not yet validated
+                    code: 0
+                Confirmed:
+                    description: Ticket has been validated and is ready for use
+                    code: 1
+                Cancelled:
+                    description: Ticket has been cancelled and is no longer valid
+                    code: 2
+                Used:
+                    description: Ticket has been used and cannot be used again
+                    code: 3

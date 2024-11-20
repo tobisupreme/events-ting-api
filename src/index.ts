@@ -1,13 +1,14 @@
+import cors, { CorsOptions } from 'cors';
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import { env } from '../config/index';
 import * as packageJson from '../package.json';
 import { requestLogger } from './common/middleware';
 import { errorHandler } from './common/utils';
+import docsRouter from './docs';
 import { eventsRouter } from './events';
 import { ticketsRouter } from './tickets';
 import { usersRouter } from './users';
-import cors, { CorsOptions } from 'cors';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(cors(corsOptions));
 
 app.use(requestLogger);
 
+app.use('/', docsRouter);
 app.use('/events', eventsRouter);
 app.use('/users', usersRouter);
 app.use('/tickets', ticketsRouter);
