@@ -336,7 +336,54 @@ paths:
                                             critical:
                                                 type: boolean
                                                 example: true
-
+        post:
+            summary: Check in user for event registration
+            description: Validates and processes event check-in for a given registration
+            tags:
+                - Events
+            parameters:
+                - name: registrationId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: Event registration ID
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CheckInRequestSchema'
+            responses:
+                '200':
+                    description: Ticket successfully checked in
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        $ref: '#/components/schemas/StatusEnum'
+                                    data:
+                                        $ref: '#/components/schemas/CheckInSuccessResponseSchema'
+                '400':
+                    description: Event registration is invalid or ticket does not exist
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            context:
+                                                type: string
 components:
     schemas:
         RegisterUserForEventSchema:
@@ -463,6 +510,25 @@ components:
                             description: Base64 encoded barcode image
                         status:
                             $ref: '#/components/schemas/TicketStatusEnum'
+        CheckInRequestSchema:
+            type: object
+            properties:
+                status:
+                    type: string
+                    enum: [Confirmed, Cancelled]
+                    default: Confirmed
+            required:
+                - status
+        CheckInSuccessResponseSchema:
+            type: object
+            properties:
+                message:
+                    type: string
+                    default: Ticket successfully checked in
+                time:
+                    type: string
+                    format: date-time
+                    example: '2024-11-20T07:11:30.221Z'
         StatusEnum:
             type: string
             enum:
