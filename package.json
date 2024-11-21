@@ -29,12 +29,16 @@
             "pre-commit": "lint-staged"
         }
     },
+    "prisma": {
+        "seed": "tsx ./prisma/seed.ts"
+    },
     "lint-staged": {
         "*.{js,jsx,json,md,yml,yaml}": "npm run format:write",
         "*.{js,ts}": "npm run lint"
     },
     "license": "MIT",
     "dependencies": {
+        "@faker-js/faker": "^9.2.0",
         "@prisma/client": "^5.22.0",
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",
