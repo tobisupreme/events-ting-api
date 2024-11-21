@@ -8,12 +8,11 @@ info:
         These APIs provide a comprehensive solution for event organizers to efficiently manage their events and ensure a smooth check-in process for attendees.
     version: 0.0.1
 servers:
-    - url: '{scheme}://{host}'
+    - url: '{url}'
       variables:
-          scheme:
-              default: http
-          host:
-              default: 127.0.0.1:{{PORT}}
+          url:
+            default: http://localhost:5678
+            enum:
 
 paths:
     # --------------- Users ---------------
