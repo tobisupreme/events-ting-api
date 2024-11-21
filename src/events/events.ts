@@ -1,3 +1,4 @@
+import { TicketStatus } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Request, Response, Router } from 'express';
 import {
@@ -44,9 +45,7 @@ router
     .post(
         validateRequestParam(IsValidUuidSchema),
         validateRequestBody(CheckInUserForEventSchema),
-        (req, res) => {
-            res.json(req.body);
-        }
+        checkInEventRegistration
     );
 
 router.route('/:id').get(validateRequestParam(IsValidUuidSchema), getEvent);
@@ -214,6 +213,50 @@ async function getEventRegistration(req: Request, res: Response) {
         ResponseType.Success,
         eventRegistration
     );
+
+    res.status(status).json(body);
+}
+
+async function checkInEventRegistration(req: Request, res: Response) {
+    const { id } = req.params as IsValidUuidSchema;
+
+    const eventRegistration = await prisma.eventRegisteration.findFirst({
+        where: { id },
+        select: {
+            status: true,
+            user: { select: { id: true, email: true, name: true } },
+            ticket: {
+                select: {
+                    id: true,
+                    status: true,
+                    updatedAt: true,
+                },
+            },
+        },
+    });
+
+    if (!eventRegistration || !eventRegistration.ticket) {
+        return fail(
+            res,
+            ApiError.TicketInvalid,
+            'Event registration is invalid or ticket does not exist'
+        );
+    }
+
+    if (eventRegistration.ticket.status === TicketStatus.Confirmed) {
+        const context = `Ticket for ${eventRegistration.user.email} was used at ${eventRegistration.ticket.updatedAt}`;
+        return fail(res, ApiError.TicketClaimed, context);
+    }
+
+    await prisma.ticket.update({
+        where: { id: eventRegistration.ticket.id },
+        data: { status: TicketStatus.Confirmed },
+    });
+
+    const { body, status } = createResponse(ResponseType.Success, {
+        message: 'Ticket successfully checked in',
+        time: new Date(),
+    });
 
     res.status(status).json(body);
 }
