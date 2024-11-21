@@ -4,7 +4,7 @@
 A ticket management system for events with status tracking and validation.
 
 ## Features
-- Ticket lifecycle management (Pending → Confirmed → Used/Cancelled)
+- Ticket lifecycle management (Pending → Confirmed/Cancelled)
 - Status transition validation
 - Barcode generation
 - Audit logging
@@ -25,7 +25,7 @@ node >= 18
 postgresql >= 14
 ```
 
-## Installation
+## Development
 ```
 # Clone repository
 git clone <repo-url>
@@ -39,17 +39,15 @@ cp .env.example .env
 # Start PostgreSQL using Docker (Optional)
 docker compose up -d --build
 
+# Generate Prisma client
+npm run schema.generate
+
 # Prepare the database
 npm run migration:apply
-```
-
-## Development
-```
-# Generate Prisma client
-npx prisma generate
+npx prisma db seed
 
 # Start development server
-npm run dev
+npm run start:dev
 ```
 
 ## API Documentation
