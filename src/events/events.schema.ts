@@ -23,7 +23,7 @@ export type RegisterUserForEventSchema = z.infer<
 
 export const CheckInUserForEventSchema = z
     .object({
-        status: z.nativeEnum(TicketStatus),
+        status: z.enum([TicketStatus.Cancelled, TicketStatus.Confirmed]),
     })
     .strict();
 export type CheckInUserForEventSchema = z.infer<

@@ -56,6 +56,8 @@ model Ticket {
   event_registration  EventRegisteration @relation(fields: [eventRegistrationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   barcodeData         String?            @map("barcode_data") @db.Text
   status              TicketStatus       @default(Pending)
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt           DateTime?          @updatedAt @map("updated_at") @db.Timestamp(6)
 
   @@map("tickets")
 }
@@ -74,5 +76,4 @@ enum TicketStatus {
   Pending
   Confirmed
   Cancelled
-  Used
 }
