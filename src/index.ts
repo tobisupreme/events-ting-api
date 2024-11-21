@@ -41,6 +41,9 @@ app.use('/', (_: Request, res: Response) => {
 
 app.use(errorHandler);
 
-app.listen(env.PORT, () => {
-    console.log(`Server is running on port ${env.PORT}`);
+app.listen(env.API.PORT, () => {
+    console.log(`%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%`);
+    console.log(`Server is running on port ${env.API.PORT}`);
+    console.log(`API documentation: ${env.API.HOST}/api-docs`);
+    console.log(`%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%`);
 });

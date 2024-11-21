@@ -4,9 +4,9 @@ function getEnv(name: string, defaultValue?: any) {
 
 const env = {
     NODE_ENV: getEnv('NODE_ENV', 'development'),
-    PORT: parseInt(getEnv('API_PORT', '3210')),
     ALLOWED_ORIGINS: getEnv('ALLOWED_ORIGINS', '*'),
-    SWAGGER: {
+    API: {
+        PORT: parseInt(getEnv('API_PORT', '3210')),
         SCHEME: getEnv('API_SCHEME', 'http'),
         HOSTNAME: getEnv('API_HOSTNAME', 'localhost'),
         HOST: `${getEnv(
@@ -14,7 +14,7 @@ const env = {
             `${getEnv('API_SCHEME', 'http')}://${getEnv(
                 'API_HOSTNAME',
                 'localhost'
-            )}:${getEnv('API_PORT', 3210)}`
+            )}:${getEnv('API_PORT', '3210')}`
         )}`,
     },
     QR_CODE: {

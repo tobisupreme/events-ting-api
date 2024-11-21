@@ -11,8 +11,8 @@ if (env.NODE_ENV === 'development') {
     const swaggerJsDocs = parse(file);
 
     swaggerJsDocs.servers.forEach((server: any) => {
-        server.variables.url.default = env.SWAGGER.HOST;
-        server.variables.url.enum = [env.SWAGGER.HOST];
+        server.variables.url.default = env.API.HOST;
+        server.variables.url.enum = [env.API.HOST];
     });
 
     router.use('/api-docs', serve, setup(swaggerJsDocs));
