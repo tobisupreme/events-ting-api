@@ -12,6 +12,7 @@ RUN npm install
 
 # Copy the rest of the application code to the working directory
 COPY . .
+RUN chmod +x docker-entrypoint.js
 
 # Generate prisma client
 RUN npm run schema.generate
@@ -22,5 +23,8 @@ RUN npm run build
 # Expose the port the app runs on
 EXPOSE 3000
 
+# Set entrypoint
+ENTRYPOINT ["./docker-entrypoint.js"]
+
 # Define the command to run the application
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:dev"]
