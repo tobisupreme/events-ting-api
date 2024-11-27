@@ -61,7 +61,7 @@ router
         getEventRegistration
     )
     .post(
-        validateRequestParam(IsValidUuidSchema),
+        validateRequestParam(FindOneEventRegistrationSchema),
         validateRequestBody(CheckInUserForEventSchema),
         checkInEventRegistration
     );
@@ -280,10 +280,12 @@ async function getEventRegistration(req: Request, res: Response) {
 }
 
 async function checkInEventRegistration(req: Request, res: Response) {
-    const { id } = req.params as IsValidUuidSchema;
+    const { regIdOrEmail } = req.params as FindOneEventRegistrationSchema;
+    const { status: ticketStatus }: CheckInUserForEventSchema = req.body;
+
+    const isEmail = z.string().email().safeParse(regIdOrEmail).success;
 
     const eventRegistration = await prisma.eventRegisteration.findFirst({
-        where: { id },
         select: {
             status: true,
             user: { select: { id: true, email: true, name: true } },
@@ -295,6 +297,9 @@ async function checkInEventRegistration(req: Request, res: Response) {
                 },
             },
         },
+        where: isEmail
+            ? { user: { email: regIdOrEmail } }
+            : { id: regIdOrEmail },
     });
 
     if (!eventRegistration || !eventRegistration.ticket) {
@@ -312,7 +317,7 @@ async function checkInEventRegistration(req: Request, res: Response) {
 
     await prisma.ticket.update({
         where: { id: eventRegistration.ticket.id },
-        data: { status: TicketStatus.Confirmed },
+        data: { status: ticketStatus },
     });
 
     const { body, status } = createResponse(ResponseType.Success, {

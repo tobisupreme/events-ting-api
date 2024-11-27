@@ -352,13 +352,12 @@ paths:
             tags:
                 - Events
             parameters:
-                - name: registrationId
+                - name: regIdOrEmail
                   in: path
                   required: true
                   schema:
                       type: string
-                      format: uuid
-                  description: Event registration ID
+                  description: The ID of the event registration entry or the email address of the event attendee
             requestBody:
                 required: true
                 content:
