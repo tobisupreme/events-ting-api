@@ -270,19 +270,18 @@ paths:
                                                 type: boolean
                                                 example: true
 
-    /events/registrations/{registrationId}:
+    /events/registrations/{regIdOrEmail}:
         get:
             tags:
                 - Events
             summary: Get details about an event registration
             parameters:
-                - name: registrationId
+                - name: regIdOrEmail
                   in: path
                   required: true
                   schema:
                       type: string
-                      format: uuid
-                  description: The ID of the event registration entry
+                  description: The ID of the event registration entry or the email address of the event attendee
             responses:
                 '200':
                     description: Event registration details
@@ -395,6 +394,7 @@ paths:
                                                 type: string
                                             context:
                                                 type: string
+
 components:
     schemas:
         RegisterUserForEventSchema:

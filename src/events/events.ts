@@ -1,6 +1,7 @@
 import { Prisma, TicketStatus } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Request, Response, Router } from 'express';
+import { z } from 'zod';
 import {
     ApiError,
     createResponse,
@@ -13,12 +14,12 @@ import {
     validateRequestParam,
     validateRequestQuery,
 } from '../common';
-import { IsValidTermSchema } from '../common/term.schema';
 import { prisma } from '../db';
 import {
     CheckInUserForEventSchema,
     EventSchema,
     FindEventRegistrationsSchema,
+    FindOneEventRegistrationSchema,
     RegisterUserForEventSchema,
 } from './events.schema';
 
@@ -54,8 +55,11 @@ router
     .delete(validateRequestParam(IsValidUuidSchema), deleteEVentRegistration);
 
 router
-    .route('/registrations/:id')
-    .get(validateRequestParam(IsValidUuidSchema), getEventRegistration)
+    .route('/registrations/:regIdOrEmail')
+    .get(
+        validateRequestParam(FindOneEventRegistrationSchema),
+        getEventRegistration
+    )
     .post(
         validateRequestParam(IsValidUuidSchema),
         validateRequestBody(CheckInUserForEventSchema),
@@ -235,10 +239,10 @@ async function getEventRegistrations(req: Request, res: Response) {
 }
 
 async function getEventRegistration(req: Request, res: Response) {
-    const { id } = req.params as IsValidUuidSchema;
+    const { regIdOrEmail } = req.params as FindOneEventRegistrationSchema;
 
-    const eventRegistration = await prisma.eventRegisteration.findFirst({
-        where: { id },
+    const isEmail = z.string().email().safeParse(regIdOrEmail).success;
+    const queryArgs: Prisma.EventRegisterationFindFirstArgs = {
         select: {
             id: true,
             createdAt: true,
@@ -253,7 +257,19 @@ async function getEventRegistration(req: Request, res: Response) {
                 },
             },
         },
-    });
+    };
+
+    queryArgs.where = {
+        ...(isEmail ? { user: { email: regIdOrEmail } } : { id: regIdOrEmail }),
+    };
+
+    const eventRegistration = await prisma.eventRegisteration.findFirst(
+        queryArgs
+    );
+
+    if (!eventRegistration) {
+        return fail(res, ApiError.NotFound, 'Event registration not found');
+    }
 
     const { body, status } = createResponse(
         ResponseType.Success,

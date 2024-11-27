@@ -37,3 +37,10 @@ export const FindEventRegistrationsSchema = IsValidTermSchema.extend({
 export type FindEventRegistrationsSchema = z.infer<
     typeof FindEventRegistrationsSchema
 >;
+
+export const FindOneEventRegistrationSchema = z.object({
+    regIdOrEmail: z.union([z.string().email(), z.string().uuid()]),
+});
+export type FindOneEventRegistrationSchema = z.infer<
+    typeof FindOneEventRegistrationSchema
+>;
