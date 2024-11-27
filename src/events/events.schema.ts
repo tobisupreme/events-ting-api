@@ -1,5 +1,6 @@
 import { TicketStatus } from '@prisma/client';
 import { z } from 'zod';
+import { IsValidTermSchema } from '../common/term.schema';
 
 export const EventSchema = z
     .object({
@@ -28,4 +29,11 @@ export const CheckInUserForEventSchema = z
     .strict();
 export type CheckInUserForEventSchema = z.infer<
     typeof CheckInUserForEventSchema
+>;
+
+export const FindEventRegistrationsSchema = IsValidTermSchema.extend({
+    status: z.nativeEnum(TicketStatus).optional(),
+}).strict();
+export type FindEventRegistrationsSchema = z.infer<
+    typeof FindEventRegistrationsSchema
 >;

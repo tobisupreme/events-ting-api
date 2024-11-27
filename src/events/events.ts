@@ -1,4 +1,4 @@
-import { TicketStatus } from '@prisma/client';
+import { Prisma, TicketStatus } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Request, Response, Router } from 'express';
 import {
@@ -11,11 +11,14 @@ import {
     ResponseType,
     validateRequestBody,
     validateRequestParam,
+    validateRequestQuery,
 } from '../common';
+import { IsValidTermSchema } from '../common/term.schema';
 import { prisma } from '../db';
 import {
     CheckInUserForEventSchema,
     EventSchema,
+    FindEventRegistrationsSchema,
     RegisterUserForEventSchema,
 } from './events.schema';
 
@@ -35,8 +38,19 @@ router
     );
 
 router
+    .route('/registrations')
+    .get(
+        validateRequestQuery(FindEventRegistrationsSchema),
+        getEventRegistrations
+    );
+
+router
     .route('/:id/registrations')
-    .get(validateRequestParam(IsValidUuidSchema), getEventRegistrations)
+    .get(
+        validateRequestParam(IsValidUuidSchema),
+        validateRequestQuery(FindEventRegistrationsSchema),
+        getEventRegistrations
+    )
     .delete(validateRequestParam(IsValidUuidSchema), deleteEVentRegistration);
 
 router
@@ -161,9 +175,41 @@ async function registerUserForEvent(req: Request, res: Response) {
 
 async function getEventRegistrations(req: Request, res: Response) {
     const { id }: IsValidUuidSchema = req.params as IsValidUuidSchema;
+    const { status: registrationStatus, term }: FindEventRegistrationsSchema = (
+        req as any
+    ).validatedQuery;
+
+    const queryArgs: Prisma.EventRegisterationFindManyArgs = {
+        where: {
+            ...(id && { eventId: id }),
+            ...(term && {
+                OR: [
+                    {
+                        user: {
+                            name: {
+                                contains: term as string,
+                                mode: 'insensitive',
+                            },
+                        },
+                    },
+                    {
+                        user: {
+                            email: {
+                                contains: term as string,
+                                mode: 'insensitive',
+                            },
+                        },
+                    },
+                ],
+            }),
+            ...(registrationStatus && {
+                ticket: { status: registrationStatus },
+            }),
+        },
+    };
 
     const eventRegistrations = await prisma.eventRegisteration.findMany({
-        where: { eventId: id },
+        where: { ...queryArgs.where },
         select: {
             id: true,
             createdAt: true,

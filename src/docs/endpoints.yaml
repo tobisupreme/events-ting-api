@@ -11,8 +11,8 @@ servers:
     - url: '{url}'
       variables:
           url:
-            default: http://localhost:5678
-            enum:
+              default: http://localhost:5678
+              enum:
 
 paths:
     # --------------- Users ---------------
@@ -191,6 +191,18 @@ paths:
                       type: string
                       format: uuid
                   description: The ID of the event
+                - name: term
+                  in: query
+                  required: false
+                  schema:
+                      type: string
+                  description: Optional search term to filter registrations
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                      $ref: '#/components/schemas/TicketStatusEnum'
+                  description: Optional search term to filter registrations by ticket status
             responses:
                 '200':
                     description: A list of event registrations
@@ -541,7 +553,6 @@ components:
                 - Pending
                 - Confirmed
                 - Cancelled
-                - Used
             default: Pending
             x-enum-metadata:
                 Pending:
