@@ -28,12 +28,19 @@ model Event {
   startDate          DateTime             @map("start_date") @db.Timestamp(6)
   endDate            DateTime?            @map("end_date") @db.Timestamp(6)
   metadata           Json?
+  type               EventType            @default(Virtual)
+  organizer          String?              @db.VarChar(255)
   status             Boolean              @default(true)
   createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt          DateTime             @updatedAt @map("updated_at") @db.Timestamp(6)
   eventRegistrations EventRegisteration[]
 
   @@map("event")
+}
+
+enum EventType {
+  Virtual
+  Physical
 }
 
 model EventRegisteration {
