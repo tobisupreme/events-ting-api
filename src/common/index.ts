@@ -1,2 +1,3 @@
-export * from './uuid.schema';
+export * from './term.schema';
 export * from './utils';
+export * from './uuid.schema';

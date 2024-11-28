@@ -7,6 +7,7 @@ export enum ApiError {
     ParamInvalid = 'error.api.param_invalid',
     QueryInvalid = 'error.api.query_invalid',
     Generic = 'error.api.generic',
+    NotFound = 'error.api.not_found',
     InvalidOperation = 'error.api.operation_invalid',
     TicketClaimed = 'error.api.ticket_claimed',
     TicketInvalid = 'error.api.ticket_invalid',

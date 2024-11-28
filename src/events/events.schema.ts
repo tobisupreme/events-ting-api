@@ -1,12 +1,15 @@
-import { TicketStatus } from '@prisma/client';
+import { EventType, TicketStatus } from '@prisma/client';
 import { z } from 'zod';
-import { IsValidTermSchema } from '../common/term.schema';
+import { IsValidTermSchema, IsValidUuidSchema } from '../common';
 
 export const EventSchema = z
     .object({
         name: z.string().max(50),
         startDate: z.coerce.date(),
         endDate: z.coerce.date().optional(),
+        venue: z.string().optional(),
+        type: z.nativeEnum(EventType),
+        organizer: z.string().optional(),
         metaData: z.any().optional(),
     })
     .strict();
@@ -36,4 +39,11 @@ export const FindEventRegistrationsSchema = IsValidTermSchema.extend({
 }).strict();
 export type FindEventRegistrationsSchema = z.infer<
     typeof FindEventRegistrationsSchema
+>;
+
+export const FindOneEventRegistrationSchema = IsValidUuidSchema.extend({
+    ticketIdOrEmail: z.string(),
+});
+export type FindOneEventRegistrationSchema = z.infer<
+    typeof FindOneEventRegistrationSchema
 >;
