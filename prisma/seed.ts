@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
-import { PrismaClient } from '@prisma/client';
-import { generateQRCode } from '../src/common';
+import { EventType, PrismaClient } from '@prisma/client';
+import { generateEventRegistrationTicket } from '../src/tickets';
 
 faker.seed(1738);
 
@@ -9,14 +9,16 @@ const prisma = new PrismaClient();
 async function main() {
     const promises = [];
 
-    const events = ['', '', ''].map((_) => {
-        const startDate = faker.date.soon();
-        return {
-            name: faker.lorem.words(3),
+    const events = [
+        {
             id: faker.string.uuid(),
-            startDate,
-        };
-    });
+            name: 'YPIT Series F',
+            startDate: new Date('2024-11-30T13:00:00'),
+            type: EventType.Physical,
+            organizer: 'YPIT Limited',
+            venue: 'Bature Brewery',
+        },
+    ];
     promises.push(
         ...events.map((event) =>
             prisma.event.upsert({
@@ -27,7 +29,7 @@ async function main() {
         )
     );
 
-    const users = ['', '', ''].map((_) => {
+    const users = new Array(50).fill('').map(() => {
         const firstName = faker.person.firstName();
         const lastName = faker.person.lastName();
         const email = faker.internet
@@ -55,40 +57,38 @@ async function main() {
     await Promise.all(promises);
 
     const eventRegistrations = [];
+
     for (const user of users) {
         for (const event of events) {
             eventRegistrations.push({
                 userId: user.id,
                 eventId: event.id,
                 id: faker.string.uuid(),
+                numberOfTickets: 1,
             });
         }
     }
+    eventRegistrations[eventRegistrations.length - 1].numberOfTickets = 4;
+    eventRegistrations[eventRegistrations.length - 2].numberOfTickets = 2;
+    eventRegistrations[eventRegistrations.length - 3].numberOfTickets = 2;
 
-    for await (const { id, ...eventRegistration } of eventRegistrations) {
-        await prisma.eventRegisteration.upsert({
-            where: { id },
-            create: { id, ...eventRegistration },
-            update: eventRegistration,
-        });
-        const barcodeData = await generateQRCode(id);
-        if (!barcodeData) {
-            console.warn(
-                'Failed to generate barcode for event registration: ',
-                id
-            );
-        }
-        await prisma.ticket.upsert({
-            where: { eventRegistrationId: id },
-            create: {
-                eventRegistrationId: id,
-                barcodeData,
-            },
-            update: {
-                barcodeData,
-            },
-        });
+    const eventRegisterationPromises = [];
+    for (const { id, ...eventRegistration } of eventRegistrations) {
+        eventRegisterationPromises.push(
+            prisma.eventRegisteration.upsert({
+                where: { id },
+                create: { id, ...eventRegistration },
+                update: eventRegistration,
+            })
+        );
     }
+    await Promise.all(eventRegisterationPromises);
+
+    await Promise.all(
+        eventRegistrations.map((eventReg) => {
+            return generateEventRegistrationTicket(eventReg.id);
+        })
+    );
 
     console.log('Seed data created successfully 🎉');
 }
