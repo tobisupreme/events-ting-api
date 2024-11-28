@@ -52,10 +52,16 @@ export async function emailEventRegistrationTicket({
                 },
             },
             tickets: { select: { ticketId: true, barcodeData: true } },
+            emailSent: true,
         },
     });
     if (!registration) {
         throw new Error(ApiError.TicketInvalid);
+    }
+    if (registration.emailSent) {
+        const message = 'Email already sent';
+        console.log(message);
+        return message;
     }
 
     type Registration = NonNullable<typeof registration>;

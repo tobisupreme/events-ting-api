@@ -18,7 +18,7 @@ async function processBulkTicketRegistrations({
     data,
 }: Job<BulkAccountTransferRequest>) {
     const registrations = await prisma.eventRegisteration.findMany({
-        where: { status: true },
+        where: { status: true, emailSent: false },
     });
     if (!registrations?.length) {
         return 'No registrations found';
