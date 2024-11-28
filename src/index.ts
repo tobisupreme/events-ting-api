@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import { env } from '../config/index';
 import * as packageJson from '../package.json';
+import { initializeEmailWorker } from './common/email/queue/consumer';
 import { requestLogger } from './common/middleware';
 import { errorHandler } from './common/utils';
 import docsRouter from './docs';
@@ -45,3 +46,5 @@ app.listen(env.API.PORT, () => {
     console.log(`API documentation: ${env.API.HOST}/api-docs`);
     console.log(`%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%`);
 });
+
+initializeEmailWorker();
