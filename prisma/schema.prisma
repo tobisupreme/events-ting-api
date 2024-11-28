@@ -53,7 +53,8 @@ model EventRegisteration {
   status          Boolean  @default(true)
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   tickets         Ticket[]
-  numberOfTickets Int      @default(1)
+  numberOfTickets Int      @default(1) @map("number_of_tickets")
+  emailSent       Boolean  @default(false) @map("email_sent")
 
   @@unique([userId, eventId])
   @@map("event_registerations")
