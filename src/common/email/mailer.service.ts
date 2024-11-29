@@ -10,24 +10,29 @@ export class MailerService {
     async sendEventTicket(
         to: string,
         context: EventTicketEmailContext
-    ): Promise<void> {
+    ): Promise<any> {
+        const tickets = context.tickets || [];
+
+        const attachments = tickets.map((ticket, index) => ({
+            filename: `qr-code-${index + 1}.png`,
+            content: Buffer.from(ticket.barcodeUrl.split(',')[1], 'base64'),
+            cid: `qr-code-${index + 1}@event`,
+        }));
+
+        const modifiedContext = {
+            ...context,
+            tickets: tickets.map((ticket, index) => ({
+                ...ticket,
+                cidForbarcodeUrl: `cid:qr-code-${index + 1}@event`,
+            })),
+        };
+
         const options: EmailOptions = {
             to,
-            subject: `Your Ticket for ${context.eventName}`,
+            subject: `Your Access for ${context.eventName}`,
             templateName: EmailTemplates.EVENT_REGISTRATION,
-            context: { ...context, cidForbarcodeUrl: 'cid:qr-code@event' },
-            ...(context.barcodeUrl && {
-                attachments: [
-                    {
-                        filename: 'qr-code.png',
-                        content: Buffer.from(
-                            context.barcodeUrl.split(',')[1],
-                            'base64'
-                        ),
-                        cid: 'qr-code@event',
-                    },
-                ],
-            }),
+            context: modifiedContext,
+            ...(attachments.length > 0 && { attachments }),
         };
 
         return await this.emailService.sendEmail(options);

@@ -3,6 +3,7 @@ import handlebars from 'handlebars';
 import { Transporter, createTransport } from 'nodemailer';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { env } from '../../../config';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,18 +20,10 @@ export class EmailService {
     private transporter: Transporter;
 
     constructor() {
-        this.transporter = createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASSWORD,
-            },
-        });
+        this.transporter = createTransport(env.SMTP.transport);
     }
 
-    async sendEmail(options: EmailOptions): Promise<void> {
+    async sendEmail(options: EmailOptions): Promise<any> {
         try {
             const template = this.getTemplate(options.templateName);
             const html = this.compileTemplate(template, options.context);
@@ -43,7 +36,8 @@ export class EmailService {
             writeFileSync(outputPath, html, 'utf-8');
 
             return await this.transporter.sendMail({
-                from: process.env.SMTP_FROM_ADDRESS,
+                from: env.SMTP.from,
+                sender: env.SMTP.from.address,
                 to: Array.isArray(options.to)
                     ? options.to.join(',')
                     : options.to,
@@ -55,7 +49,7 @@ export class EmailService {
             });
         } catch (error) {
             console.error('Failed to send email:', error);
-            throw new Error('Failed to send email');
+            throw error;
         }
     }
 

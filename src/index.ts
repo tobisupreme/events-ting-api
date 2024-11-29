@@ -8,7 +8,6 @@ import { requestLogger } from './common/middleware';
 import { errorHandler } from './common/utils';
 import docsRouter from './docs';
 import { eventsRouter } from './events';
-import { usersRouter } from './users';
 
 const app = express();
 
@@ -26,7 +25,6 @@ app.use(requestLogger);
 
 app.use('/', docsRouter);
 app.use('/events', eventsRouter);
-app.use('/users', usersRouter);
 
 app.use('/', (_: Request, res: Response) => {
     res.status(200).json({

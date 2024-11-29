@@ -8,10 +8,12 @@ export interface EventTicketEmailContext {
     eventDate: string;
     eventTime: string;
     venue: string;
-    ticketType: string;
-    ticketId: string;
-    barcodeUrl: string;
     organizerName: string;
+    totalTickets: number;
+    tickets: Array<{
+        ticketType: string;
+        ticketId: string;
+        barcodeUrl: string;
+    }>;
 }
-
 export type EmailTemplateContext = EventTicketEmailContext;

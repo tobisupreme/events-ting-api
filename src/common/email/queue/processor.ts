@@ -1,34 +1,29 @@
 import { Job } from 'bullmq';
-import { prisma } from '../../../db';
-import { emailEventRegistrationTicket } from '../../../tickets/ticket.service';
+import {
+    /* emailEventRegistrationTicket, */
+    emailEventRegistrationTicket,
+} from '../../../tickets/ticket.service';
 import { JOBS } from './interfaces';
-
-interface BulkAccountTransferRequest {
-    transferIds: string[];
-    email: string;
-    subject: string;
-    html: string;
-}
 
 export interface EmailSingleEventRegistrationTicket {
     eventRegistrationId: string;
 }
 
+export interface BulkEmailEventRegistrationTicket {
+    ids: string[];
+}
+
 async function processBulkTicketRegistrations({
     data,
-}: Job<BulkAccountTransferRequest>) {
-    const registrations = await prisma.eventRegisteration.findMany({
-        where: { status: true, emailSent: false },
-    });
-    if (!registrations?.length) {
+}: Job<BulkEmailEventRegistrationTicket>) {
+    if (!data.ids?.length) {
         return 'No registrations found';
     }
 
-    for await (const registration of registrations) {
-        return await emailEventRegistrationTicket({
-            eventRegistrationId: registration.id,
-        });
-    }
+    const promises = data.ids.map((eventRegistrationId) =>
+        emailEventRegistrationTicket({ eventRegistrationId })
+    );
+    return await Promise.all(promises);
 }
 
 async function emailSingleEventRegistrationTicket({

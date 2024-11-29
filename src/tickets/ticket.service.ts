@@ -1,3 +1,4 @@
+import { MessageLogStatus } from '@prisma/client';
 import fs from 'fs/promises';
 import moment from 'moment';
 import { ApiError, generateQRCode } from '../common';
@@ -78,15 +79,46 @@ export async function emailEventRegistrationTicket({
         return {
             attendeeName: registration.user.name || '',
             eventName: registration.event.name,
-            barcodeUrl: registration.tickets[0].barcodeData!,
+            tickets: registration.tickets.map((ticket) => ({
+                barcodeUrl: ticket.barcodeData!,
+                ticketId: ticket.ticketId!,
+                ticketType: 'VIP',
+            })),
             eventDate: dayFromDate,
             eventTime: timeFromDate,
             organizerName: registration.event.organizer || '',
-            ticketId: registration.tickets[0]!.ticketId!,
-            ticketType: 'VIP',
             venue: registration.event.venue!,
+            totalTickets: registration.tickets.length,
         };
     }
     const emailContext = mapTicketData(registration);
-    return mailerService.sendEventTicket(registration.user.email, emailContext);
+    return mailerService
+        .sendEventTicket(registration.user.email, emailContext)
+        .then(async (result) => {
+            await Promise.all([
+                prisma.eventRegisteration.update({
+                    where: { id: eventRegistrationId },
+                    data: { emailSent: true },
+                }),
+                prisma.messageLog.create({
+                    data: {
+                        eventRegistrationId,
+                        messageLogStatus: result?.rejected?.length
+                            ? MessageLogStatus.NotSent
+                            : MessageLogStatus.Sent,
+                        raw: JSON.stringify(result),
+                    },
+                }),
+                fs.appendFile(
+                    'emailResult.txt',
+                    `Result: ${JSON.stringify(result)}\n`
+                ),
+            ]);
+            return result;
+        })
+        .catch(async (error) => {
+            console.error('Error sending email:', error);
+            await fs.appendFile('emailResult.txt', `Error: ${error.message}\n`);
+            throw error;
+        });
 }

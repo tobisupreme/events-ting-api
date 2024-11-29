@@ -1,50 +1,68 @@
 <html>
     <head>
         <meta charset='utf-8' />
-        <title>Your Event Ticket</title>
+        <title>🎉 Your Event Access Is Ready!</title>
         <style>
-            .ticket-container { max-width: 600px; margin: 0 auto; font-family:
-            Arial, sans-serif; } .ticket { border: 2px solid #000;
-            border-radius: 8px; padding: 20px; margin: 20px 0; background-color:
-            #f8f8f8; } .event-details { margin: 15px 0; } .barcode { text-align:
-            center; margin: 20px 0; } .barcode img { max-width: 300px; height:
-            auto; } .ticket-info { font-size: 14px; color: #666; } .important {
-            color: #d23; font-weight: bold; }
+            .ticket-container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+            .ticket { border: 2px solid #000; border-radius: 8px; padding: 20px; margin: 20px 0; background-color: #f8f8f8; }
+            .event-details { margin: 15px 0; }
+            .barcode { text-align: center; margin: 20px 0; }
+            .barcode img { max-width: 300px; height: auto; }
+            .ticket-info { font-size: 14px; color: #666; }
+            .important { color: #d23; font-weight: bold; }
+            .ticket-header { display: flex; justify-content: space-between; align-items: center; }
+            .ticket-number { font-size: 16px; color: #666; }
         </style>
     </head>
     <body>
         <div class='ticket-container'>
-            <h1>Your Event Ticket</h1>
-            <p>Hello {{attendeeName}},</p>
-            <p>Thank you for registering for
-                {{eventName}}. Here's your ticket:</p>
+            <h1>🎟️ Your Access Is Ready! 🎫</h1>
+            <p>Hey {{attendeeName}},</p>
+            
+            {{#if isMultipleTickets}}
+            <p>Woohoo! 🥳 You're all set for {{eventName}}. Check out your awesome access below:</p>
+            {{else}}
+            <p>Woohoo! 🥳 You're all set for {{eventName}}. Your access is ready!</p>
+            {{/if}}
 
+            {{#each tickets}}
             <div class='ticket'>
-                <h2>{{eventName}}</h2>
+                <div class='ticket-header'>
+                    <h2>{{../eventName}}</h2>
+                    {{#if ../isMultipleTickets}}
+                    <span class='ticket-number'>Ticket {{add @index 1}} of {{../totalTickets}} 🎉</span>
+                    {{/if}}
+                </div>
                 <div class='event-details'>
-                    <p><strong>Date:</strong> {{eventDate}}</p>
-                    <p><strong>Time:</strong> {{eventTime}}</p>
-                    <p><strong>Venue:</strong> {{venue}}</p>
-                    <p><strong>Ticket Type:</strong> {{ticketType}}</p>
-                    <p><strong>Ticket ID:</strong> {{ticketId}}</p>
+                    <p><strong>📅 Date:</strong> {{../eventDate}}</p>
+                    <p><strong>🕒 Time:</strong> 1:00 pm</p>
+                    <p><strong>📍 Venue:</strong> {{../venue}}</p>
+                    <p><strong>🔢 Access ID:</strong> {{ticketId}}</p>
                 </div>
 
                 <div class='barcode'>
                     <img src='{{cidForbarcodeUrl}}' alt='Ticket Barcode' />
                 </div>
+            </div>
+            {{/each}}
 
-                <div class='ticket-info'>
-                    <p class='important'>Important Notes:</p>
-                    <ul>
-                        <li>Please arrive at least 30 minutes before the event</li>
-                        <li>This ticket is unique and can only be used once</li>
-                        <li>Please have a valid ID with you</li>
-                    </ul>
-                </div>
+            <div class='ticket-info'>
+                <p class='important'>🚨 Important Heads Up! 🚨</p>
+                <ul>
+                    <li>Pro tip: Roll up 30 minutes early to beat the crowd 🏃‍♀️</li>
+                    <li>{{#if isMultipleTickets}}Each access is{{else}}This access is{{/if}} a one-time magic pass 🔐</li>
+                    <li>Don't forget your ID! 👮</li>
+                </ul>
             </div>
 
-            <p>If you have any questions, please don't hesitate to contact us.</p>
-            <p>Best regards,<br />{{organizerName}}</p>
+            {{#if isMultipleTickets}}
+            <p>🎊 Total Tickets Purchased: {{totalTickets}} 🎊</p>
+            {{/if}}
+
+            <p>Got questions? We're all ears! 👂 Just give us a shout.</p>
+            <p>Can't wait to see you there!<br />
+            Cheers,<br />
+            All of us at Young People In Tech 🌟</p>
         </div>
     </body>
 </html>

@@ -337,3 +337,47 @@ paths:
                                                 Ticket for emanuel.hirthe@inboxbear.com was used at Thu
                                                 Nov 28 2024 12:06:52 GMT+0100 (West Africa Standard
                                                 Time)
+
+    /emails/send/{email}:
+        post:
+            tags:
+                - Test Email
+            summary: Send out email
+            parameters:
+                - name: email
+                  in: path
+                  schema:
+                      type: string
+                  style: simple
+                  explode: false
+                  required: true
+                  examples:
+                      tobisupreme:
+                          value: tobi.balo@gmail.com
+                      ypit:
+                          value: someoneintech@gmail.com
+            responses:
+                '200':
+                    description: Success
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    error:
+                                        type: object
+                                        properties:
+                                            code:
+                                                type: string
+                                            critical:
+                                                type: boolean
+                                                example: true
