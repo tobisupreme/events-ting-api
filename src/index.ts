@@ -3,11 +3,11 @@ import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import { env } from '../config/index';
 import * as packageJson from '../package.json';
+import { initializeEmailWorker } from './common/email/queue/consumer';
 import { requestLogger } from './common/middleware';
 import { errorHandler } from './common/utils';
 import docsRouter from './docs';
 import { eventsRouter } from './events';
-import { usersRouter } from './users';
 
 const app = express();
 
@@ -25,7 +25,6 @@ app.use(requestLogger);
 
 app.use('/', docsRouter);
 app.use('/events', eventsRouter);
-app.use('/users', usersRouter);
 
 app.use('/', (_: Request, res: Response) => {
     res.status(200).json({
@@ -45,3 +44,5 @@ app.listen(env.API.PORT, () => {
     console.log(`API documentation: ${env.API.HOST}/api-docs`);
     console.log(`%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%`);
 });
+
+initializeEmailWorker();

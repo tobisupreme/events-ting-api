@@ -131,3 +131,7 @@ dist
 
 # database
 *.db
+
+event-ticket-*.html
+emailResult.txt
+src/tickets/tickets.service.ts

@@ -1,12 +1,22 @@
 import { faker } from '@faker-js/faker';
 import { EventType, PrismaClient } from '@prisma/client';
-import { generateEventRegistrationTicket } from '../src/tickets';
+import { execSync } from 'node:child_process';
+import { generateEventRegistrationTicket } from '../../src/tickets';
 
 faker.seed(1738);
+
+type userData = {
+    email: string;
+    name: string;
+    quantity: number;
+};
+
+import userData from './YPIT_REG_normalized_unique_emails.json';
 
 const prisma = new PrismaClient();
 
 async function main() {
+    execSync('npm run migration:apply');
     const promises = [];
 
     const events = [
@@ -29,21 +39,11 @@ async function main() {
         )
     );
 
-    const users = new Array(1200).fill('').map((_, index) => {
-        const firstName = faker.person.firstName();
-        const lastName = faker.person.lastName();
-        const email =
-            /* faker.internet
-            .email({
-                firstName,
-                lastName,
-                provider: 'inboxbear.com',
-            })
-            .toLowerCase()  */ 'tobi.balo' + '+' + index + '@gmail.com';
+    const users = userData.map((user) => {
         return {
-            email,
+            email: user.email,
             id: faker.string.uuid(),
-            name: `${firstName} ${lastName}`,
+            name: user.name,
         };
     });
     promises.push(
@@ -58,22 +58,24 @@ async function main() {
     await Promise.all(promises);
 
     const eventRegistrations = [];
+    const userDataDictionary = userData.reduce(
+        (acc: Record<string, userData>, user) => {
+            acc[user.email] = user;
+            return acc;
+        },
+        {}
+    );
 
-    const numbers = [1];
     for (const user of users) {
         for (const event of events) {
-            const data = {
+            eventRegistrations.push({
                 userId: user.id,
                 eventId: event.id,
                 id: faker.string.uuid(),
-                numberOfTickets: faker.helpers.arrayElement(numbers),
-            };
-            eventRegistrations.push(data);
+                numberOfTickets: userDataDictionary[user.email].quantity,
+            });
         }
     }
-    // eventRegistrations[eventRegistrations.length - 1].numberOfTickets = 4;
-    // eventRegistrations[eventRegistrations.length - 2].numberOfTickets = 2;
-    // eventRegistrations[eventRegistrations.length - 3].numberOfTickets = 2;
 
     const eventRegisterationPromises = [];
     for (const { id, ...eventRegistration } of eventRegistrations) {
