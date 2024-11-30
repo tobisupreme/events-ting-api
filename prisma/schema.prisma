@@ -82,6 +82,7 @@ model Ticket {
   eventRegistration   EventRegisteration @relation(fields: [eventRegistrationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ticketId            String?            @unique
   barcodeData         String?            @map("barcode_data") @db.Text
+  checkInTime         DateTime?          @map("check_in_time") @db.Timestamp(6)
   status              TicketStatus       @default(Pending)
   createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt           DateTime?          @updatedAt @map("updated_at") @db.Timestamp(6)

@@ -184,7 +184,7 @@ export async function checkInEventRegistration(req: Request, res: Response) {
 
     await prisma.ticket.update({
         where: { id: ticket.id },
-        data: { status: reqBody.status },
+        data: { status: reqBody.status, ...(reqBody.status === TicketStatus.Confirmed && { checkInTime: new Date() }) },
     });
 
     const { body, status } = createResponse(ResponseType.Success, {
